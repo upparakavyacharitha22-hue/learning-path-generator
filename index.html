@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillCraft • Personalized Learning Path Generator</title>
+  <meta name="description" content="Generate personalized, step-by-step visual learning roadmaps with dynamic milestones, time estimation, interactive progress tracking, and LinkedIn sharing.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>SkillCraft <span class="badge-edition">PRO</span></h1>
+          <p class="brand-tagline">Visual Learning Path & Roadmap Generator</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="quickDemoBtn" class="btn btn-secondary btn-sm" title="Load sample Python path for quick workshop demonstration">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Quick Demo
+        </button>
+        <button id="printPdfBtn" class="btn btn-outline btn-sm" disabled title="Export as clean PDF document">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export PDF
+        </button>
+        <button id="shareModalBtn" class="btn btn-primary btn-sm" disabled title="Share to LinkedIn or copy summary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28Z"/>
+          </svg>
+          Share on LinkedIn
+        </button>
+
+        <!-- User Authentication & Profile Strip -->
+        <div id="authWrapper" class="auth-wrapper">
+          <button id="openAuthBtn" class="btn btn-outline btn-sm btn-signin" title="Sign In or Register">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Sign In
+          </button>
+
+          <div id="userProfileBadge" class="user-profile-badge hidden">
+            <div class="user-avatar" id="userAvatar">KC</div>
+            <div class="user-details">
+              <span class="user-display-name" id="userDisplayName">Kavya</span>
+              <span class="user-role-tag">Learner</span>
+            </div>
+            <button id="signOutBtn" class="btn-sign-out" title="Sign Out">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky Progress Bar Strip (Visible once a path is active) -->
+  <div id="stickyProgressTracker" class="sticky-tracker hidden">
+    <div class="tracker-container">
+      <div class="tracker-info">
+        <div class="tracker-skill-tag">
+          <span class="pulse-dot"></span>
+          <strong id="trackerSkillName">Python Programming</strong>
+          <span class="tracker-meta" id="trackerMeta">Beginner • 10h/wk</span>
+        </div>
+        <div class="tracker-stats">
+          <span id="trackerStepCount">0 of 5 steps completed</span>
+          <span class="tracker-percentage" id="trackerPercentBadge">0%</span>
+        </div>
+      </div>
+      <div class="progress-bar-wrapper">
+        <div id="trackerProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    
+    <!-- Hero / Intro Banner -->
+    <section class="hero-section">
+      <div class="hero-badge">⚡ Instant Career Accelerator</div>
+      <h2 class="hero-title">From Concept to Mastery, <span class="highlight-text">Step-by-Step</span></h2>
+      <p class="hero-subtitle" id="heroSubtitle">Generate a custom learning roadmap tailored to your current knowledge level and weekly availability. Track your milestones in real time and showcase your journey.</p>
+    </section>
+
+    <!-- App Grid Layout: Configuration Form & Visual Roadmap -->
+    <div class="app-layout">
+      
+      <!-- Left Column: User Input Section -->
+      <section class="input-panel card" id="configSection">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-step-badge">1</span>
+            <div>
+              <h3>Define Your Goal</h3>
+              <p class="card-desc">Personalize your learning parameters</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="generatorForm" class="generator-form">
+          
+          <!-- Field 1: Target Skill -->
+          <div class="form-group">
+            <label for="targetSkillInput" class="form-label">
+              <span>Target Skill or Career Goal</span>
+              <span class="required">*</span>
+            </label>
+            <div class="input-with-icon">
+              <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <input 
+                type="text" 
+                id="targetSkillInput" 
+                name="targetSkill" 
+                class="form-control" 
+                placeholder="e.g., Python, UI/UX Design, Data Science" 
+                autocomplete="off"
+                required
+              >
+            </div>
+
+            <!-- Quick Pill Suggestions -->
+            <div class="quick-skills">
+              <span class="quick-skills-label">Popular Suggestions:</span>
+              <div class="pill-group">
+                <button type="button" class="skill-pill" data-skill="Python Programming">🐍 Python</button>
+                <button type="button" class="skill-pill" data-skill="UI/UX Design">🎨 UI/UX Design</button>
+                <button type="button" class="skill-pill" data-skill="Full-Stack Web Dev">💻 Web Dev</button>
+                <button type="button" class="skill-pill" data-skill="Data Science & AI">📊 Data Science</button>
+                <button type="button" class="skill-pill" data-skill="Cloud & DevOps">☁️ Cloud & DevOps</button>
+                <button type="button" class="skill-pill" data-skill="Cybersecurity">🛡️ Cybersecurity</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 2: Current Level -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Current Experience Level</span>
+              <span class="required">*</span>
+            </label>
+            <div class="level-selector">
+              <label class="level-card active" data-level="Beginner">
+                <input type="radio" name="experienceLevel" value="Beginner" checked>
+                <span class="level-indicator beginner"></span>
+                <div class="level-content">
+                  <span class="level-title">Beginner</span>
+                  <span class="level-desc">Little to no experience</span>
+                </div>
+              </label>
+
+              <label class="level-card" data-level="Intermediate">
+                <input type="radio" name="experienceLevel" value="Intermediate">
+                <span class="level-indicator intermediate"></span>
+                <div class="level-content">
+                  <span class="level-title">Intermediate</span>
+                  <span class="level-desc">Know basics, seek real depth</span>
+                </div>
+              </label>
+
+              <label class="level-card" data-level="Advanced">
+                <input type="radio" name="experienceLevel" value="Advanced">
+                <span class="level-indicator advanced"></span>
+                <div class="level-content">
+                  <span class="level-title">Advanced</span>
+                  <span class="level-desc">Architecture & mastery</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Field 3: Time Available -->
+          <div class="form-group">
+            <div class="time-header">
+              <label for="timeRangeInput" class="form-label">
+                <span>Time Available</span>
+                <span class="required">*</span>
+              </label>
+              <div class="time-badge">
+                <span id="hoursDisplay">10</span> <span class="time-unit">Hours / week</span>
+              </div>
+            </div>
+
+            <div class="range-slider-container">
+              <input 
+                type="range" 
+                id="timeRangeInput" 
+                name="timeAvailable" 
+                min="2" 
+                max="40" 
+                step="1" 
+                value="10" 
+                class="range-slider"
+              >
+              <div class="range-ticks">
+                <span>2h (Light)</span>
+                <span>10h (Balanced)</span>
+                <span>20h (Pro)</span>
+                <span>40h (Bootcamp)</span>
+              </div>
+            </div>
+
+            <!-- Quick time buttons -->
+            <div class="quick-time-buttons">
+              <button type="button" class="btn-time-chip" data-hours="5">5 hrs</button>
+              <button type="button" class="btn-time-chip active" data-hours="10">10 hrs</button>
+              <button type="button" class="btn-time-chip" data-hours="15">15 hrs</button>
+              <button type="button" class="btn-time-chip" data-hours="20">20 hrs</button>
+              <button type="button" class="btn-time-chip" data-hours="30">30 hrs</button>
+            </div>
+          </div>
+
+          <!-- Extra Learning Strategy Focus -->
+          <div class="form-group">
+            <label for="learningFocusSelect" class="form-label">
+              <span>Primary Learning Focus</span>
+            </label>
+            <select id="learningFocusSelect" class="form-select">
+              <option value="project-based" selected>🛠️ Project-Based (Hands-on Portfolio)</option>
+              <option value="career-oriented">💼 Job-Ready Fast Track (Practical Skills)</option>
+              <option value="fundamentals">📚 Deep Academic & Conceptual Mastery</option>
+            </select>
+          </div>
+
+          <!-- Generate CTA Button -->
+          <div class="form-actions">
+            <button type="submit" id="generateBtn" class="btn btn-primary btn-lg btn-glow">
+              <span class="btn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+              </span>
+              <span id="btnText">Generate Roadmap</span>
+              <span id="btnSpinner" class="spinner hidden"></span>
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Feature Highlights Footer -->
+        <div class="panel-footer-perks">
+          <div class="perk-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Paced to your weekly schedule</span>
+          </div>
+          <div class="perk-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Real milestone projects included</span>
+          </div>
+          <div class="perk-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>One-click PDF & LinkedIn sharing</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Visual Roadmap & Interactive Progress -->
+      <section class="roadmap-panel card" id="roadmapContainer">
+        
+        <!-- Empty / Welcome Placeholder State (Shown before first generate) -->
+        <div id="emptyRoadmapState" class="empty-state">
+          <div class="empty-illustration">
+            <svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </div>
+          <h3>Ready to Chart Your Course?</h3>
+          <p>Fill out your target skill, experience level, and weekly study hours on the left, then click <strong>"Generate Roadmap"</strong>.</p>
+          <div class="empty-action">
+            <button id="emptyDemoBtn" class="btn btn-secondary">
+              ⚡ Load Python Roadmap Preview
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Roadmap Container (Populated dynamically) -->
+        <div id="activeRoadmapContent" class="roadmap-content hidden">
+          
+          <!-- Roadmap Metadata Header -->
+          <div class="roadmap-summary-box">
+            <div class="roadmap-title-row">
+              <div>
+                <span class="roadmap-kicker" id="roadmapKicker">Custom Learning Path</span>
+                <h2 class="roadmap-title" id="roadmapSkillTitle">Python Programming Mastery</h2>
+              </div>
+              <div class="roadmap-action-chips">
+                <button id="resetProgressBtn" class="chip-btn" title="Reset all checkboxes">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                  Reset Progress
+                </button>
+              </div>
+            </div>
+
+            <!-- Summary Metrics Cards -->
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <span class="metric-label">Experience Level</span>
+                <span class="metric-value" id="metricLevel">Beginner</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Estimated Time</span>
+                <span class="metric-value highlight" id="metricDuration">8 Weeks</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Total Effort</span>
+                <span class="metric-value" id="metricHours">80 Hours</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Total Modules</span>
+                <span class="metric-value" id="metricModules">5 Phases</span>
+              </div>
+            </div>
+
+            <!-- In-Card Progress Bar -->
+            <div class="card-progress-section">
+              <div class="card-progress-header">
+                <span class="progress-title">Overall Roadmap Completion</span>
+                <span class="progress-ratio" id="cardProgressText">0 / 5 Completed (0%)</span>
+              </div>
+              <div class="progress-bar-wrapper large">
+                <div id="cardProgressBar" class="progress-bar-fill animated" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vertical Timeline Roadmap -->
+          <div class="timeline-container">
+            <div class="timeline-track"></div>
+            <div class="timeline-nodes" id="timelineNodesList">
+              <!-- Dynamically rendered timeline nodes go here -->
+            </div>
+          </div>
+
+          <!-- Bottom Finish Card -->
+          <div class="roadmap-finish-card" id="finishCard">
+            <div class="finish-icon">🏆</div>
+            <div class="finish-content">
+              <h4>Capstone & Next Horizon</h4>
+              <p>Complete every milestone, assemble your portfolio, and present your journey to hiring managers and peers.</p>
+            </div>
+            <div class="finish-actions">
+              <button id="finishShareBtn" class="btn btn-primary btn-sm">
+                Share Achievement
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Sign In / Authentication Modal -->
+  <div id="authModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-card auth-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="auth-icon-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <h3 id="authModalTitle">Welcome to SkillCraft</h3>
+        </div>
+        <button id="closeAuthModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body auth-modal-body">
+        
+        <!-- Auth Tabs: Sign In / Create Account -->
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="tabSignInBtn">Sign In</button>
+          <button type="button" class="auth-tab-btn" id="tabRegisterBtn">Create Account</button>
+        </div>
+
+        <!-- Quick 1-Click Workshop Sign In -->
+        <div class="workshop-quick-auth">
+          <button type="button" id="demoUserLoginBtn" class="btn btn-secondary btn-full btn-workshop-demo">
+            ⚡ 1-Click Workshop Sign In (Kavya Charitha)
+          </button>
+          <div class="auth-divider">
+            <span>or sign in with credentials</span>
+          </div>
+        </div>
+
+        <!-- Social Logins -->
+        <div class="social-auth-grid">
+          <button type="button" class="btn-social btn-google" id="googleAuthBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            Google
+          </button>
+          <button type="button" class="btn-social btn-github" id="githubAuthBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            GitHub
+          </button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <div class="form-group" id="fullNameGroup" style="display: none;">
+            <label for="authNameInput" class="form-label">Full Name</label>
+            <input type="text" id="authNameInput" class="form-control" placeholder="e.g., Kavya Charitha">
+          </div>
+
+          <div class="form-group">
+            <label for="authEmailInput" class="form-label">Email Address</label>
+            <input type="email" id="authEmailInput" class="form-control" placeholder="name@example.com" value="kavya@learningpaths.dev" required>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">
+              <span>Password</span>
+              <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot?</a>
+            </div>
+            <input type="password" id="authPasswordInput" class="form-control" placeholder="••••••••" value="password123" required>
+          </div>
+
+          <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-full btn-lg">
+            Sign In to Account
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Share on LinkedIn Modal -->
+  <div id="shareModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="linkedin-badge-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28Z"/>
+            </svg>
+          </div>
+          <h3 id="shareModalTitle">Share on LinkedIn</h3>
+        </div>
+        <button id="closeModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Live App URL Banner (GitHub Pages) -->
+        <div class="live-url-card">
+          <div class="live-url-header">
+            <span class="live-badge">LIVE APP LINK</span>
+            <span class="live-tag">GitHub Pages</span>
+          </div>
+          <div class="live-url-row">
+            <input type="text" id="liveAppLinkInput" class="live-url-input" value="https://upparakavyacharitha22-hue.github.io/learning-path-generator/" readonly>
+            <button type="button" id="copyLiveUrlBtn" class="btn btn-outline btn-sm">Copy Link</button>
+            <a href="https://upparakavyacharitha22-hue.github.io/learning-path-generator/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">Visit</a>
+          </div>
+        </div>
+
+        <p class="modal-intro">Celebrate your learning milestones and inspire your network! We've crafted an engaging, professional post draft for you with your live link:</p>
+        
+        <div class="share-preview-box">
+          <textarea id="sharePostText" class="share-textarea" rows="9" readonly></textarea>
+        </div>
+
+        <div class="modal-feedback hidden" id="copySuccessAlert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Post text copied to clipboard!</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="copyShareTextBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy to Clipboard
+        </button>
+        <button id="openLinkedInBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28Z"/>
+          </svg>
+          Open LinkedIn Post
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Canvas for Celebration Confetti -->
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
